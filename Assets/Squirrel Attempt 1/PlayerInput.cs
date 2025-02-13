@@ -70,6 +70,34 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""CameraControls"",
+            ""id"": ""f366b51a-c41e-4173-9636-f0fba5fbf9d5"",
+            ""actions"": [
+                {
+                    ""name"": ""Camera Right Stick"",
+                    ""type"": ""Value"",
+                    ""id"": ""24f80a7f-5771-4149-956e-267beb484260"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""25f2da33-3c3f-4107-8c4e-089c9f1da41e"",
+                    ""path"": ""<HID::Core (Plus) Wired Controller>/rz"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Camera Right Stick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -78,11 +106,15 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_CharacterControls = asset.FindActionMap("CharacterControls", throwIfNotFound: true);
         m_CharacterControls_Movement = m_CharacterControls.FindAction("Movement", throwIfNotFound: true);
         m_CharacterControls_Run = m_CharacterControls.FindAction("Run", throwIfNotFound: true);
+        // CameraControls
+        m_CameraControls = asset.FindActionMap("CameraControls", throwIfNotFound: true);
+        m_CameraControls_CameraRightStick = m_CameraControls.FindAction("Camera Right Stick", throwIfNotFound: true);
     }
 
     ~@PlayerInput()
     {
         UnityEngine.Debug.Assert(!m_CharacterControls.enabled, "This will cause a leak and performance issues, PlayerInput.CharacterControls.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_CameraControls.enabled, "This will cause a leak and performance issues, PlayerInput.CameraControls.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -194,9 +226,59 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         }
     }
     public CharacterControlsActions @CharacterControls => new CharacterControlsActions(this);
+
+    // CameraControls
+    private readonly InputActionMap m_CameraControls;
+    private List<ICameraControlsActions> m_CameraControlsActionsCallbackInterfaces = new List<ICameraControlsActions>();
+    private readonly InputAction m_CameraControls_CameraRightStick;
+    public struct CameraControlsActions
+    {
+        private @PlayerInput m_Wrapper;
+        public CameraControlsActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @CameraRightStick => m_Wrapper.m_CameraControls_CameraRightStick;
+        public InputActionMap Get() { return m_Wrapper.m_CameraControls; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(CameraControlsActions set) { return set.Get(); }
+        public void AddCallbacks(ICameraControlsActions instance)
+        {
+            if (instance == null || m_Wrapper.m_CameraControlsActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_CameraControlsActionsCallbackInterfaces.Add(instance);
+            @CameraRightStick.started += instance.OnCameraRightStick;
+            @CameraRightStick.performed += instance.OnCameraRightStick;
+            @CameraRightStick.canceled += instance.OnCameraRightStick;
+        }
+
+        private void UnregisterCallbacks(ICameraControlsActions instance)
+        {
+            @CameraRightStick.started -= instance.OnCameraRightStick;
+            @CameraRightStick.performed -= instance.OnCameraRightStick;
+            @CameraRightStick.canceled -= instance.OnCameraRightStick;
+        }
+
+        public void RemoveCallbacks(ICameraControlsActions instance)
+        {
+            if (m_Wrapper.m_CameraControlsActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(ICameraControlsActions instance)
+        {
+            foreach (var item in m_Wrapper.m_CameraControlsActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_CameraControlsActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public CameraControlsActions @CameraControls => new CameraControlsActions(this);
     public interface ICharacterControlsActions
     {
         void OnMovement(InputAction.CallbackContext context);
         void OnRun(InputAction.CallbackContext context);
+    }
+    public interface ICameraControlsActions
+    {
+        void OnCameraRightStick(InputAction.CallbackContext context);
     }
 }

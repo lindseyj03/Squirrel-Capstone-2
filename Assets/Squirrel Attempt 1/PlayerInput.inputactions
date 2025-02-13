@@ -48,6 +48,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "CameraControls",
+            "id": "f366b51a-c41e-4173-9636-f0fba5fbf9d5",
+            "actions": [
+                {
+                    "name": "Camera Right Stick",
+                    "type": "Value",
+                    "id": "24f80a7f-5771-4149-956e-267beb484260",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "25f2da33-3c3f-4107-8c4e-089c9f1da41e",
+                    "path": "<HID::Core (Plus) Wired Controller>/rz",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Camera Right Stick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []
