@@ -12,10 +12,13 @@ public class CharacterMovement : MonoBehaviour
     private bool runPressed;
 
     private PlayerInput input;
+    private Transform cameraTransform;
 
     void Awake()
     {
         input = new PlayerInput();
+
+        cameraTransform = Camera.main.transform; // Reference to the camera's transform
 
         // Movement input: capture when joystick is moved or released
         input.CharacterControls.Movement.performed += ctx => 
@@ -63,7 +66,12 @@ public class CharacterMovement : MonoBehaviour
         // Move the character
         if (movementPressed)
         {
+            // Create a movement vector based on the input
             Vector3 move = new Vector3(currentMovement.x, 0, currentMovement.y);
+            move = cameraTransform.TransformDirection(move); // Camera-relative movement
+            move.y = 0; // Keep movement on the XZ plane
+
+            // Move the character based on camera direction
             transform.Translate(move * speed * Time.deltaTime, Space.World);
         }
     }
@@ -72,11 +80,19 @@ public class CharacterMovement : MonoBehaviour
     {
         if (movementPressed)
         {
+            // Get the movement direction from input
             Vector3 direction = new Vector3(currentMovement.x, 0, currentMovement.y);
+
             if (direction != Vector3.zero)
             {
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f); // Smooth rotation
+                // Get the camera's rotation to align the character with the camera's view
+                float cameraYRotation = cameraTransform.eulerAngles.y;
+
+                // Rotate the input direction based on the camera's rotation
+                Quaternion targetRotation = Quaternion.Euler(0, cameraYRotation, 0) * Quaternion.LookRotation(direction);
+
+                // Apply smooth rotation to the player itself
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
             }
         }
     }
