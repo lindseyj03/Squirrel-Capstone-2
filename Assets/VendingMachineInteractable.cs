@@ -20,6 +20,14 @@ public class VendingMachineInteractable : MonoBehaviour
     public float squirrelThrowForce = 5f; // Force to throw the squirrel out
     public float squirrelWalkSpeed = 1.5f; // Speed at which squirrel walks away
 
+//NEW 1/27
+    private Animator squirrelAnimator;  
+    public float followDistance = 1.5f; // Distance at which squirrel stops following
+    public float followSpeed = 2f; // Speed at which squirrel follows the player
+    private bool isFollowingPlayer = false; // Check if the squirrel should follow the player
+//END OF NEW 1/27
+
+
     private int shakeCount = 0;
     private bool isPlayerNearby = false;
     private bool machineUnlocked = false;
@@ -32,6 +40,12 @@ public class VendingMachineInteractable : MonoBehaviour
     private void Start()
     {
         vendingMachineRigidbody = GetComponentInParent<Rigidbody>(); // Get the Rigidbody on the parent
+
+        // Assign the squirrel's Animator
+            if (squirrel != null)
+            {
+                squirrelAnimator = squirrel.GetComponent<Animator>();
+            }
 
         // Initially hide all UI elements
         if (interactionPrompt != null) interactionPrompt.SetActive(false);
@@ -54,22 +68,45 @@ public class VendingMachineInteractable : MonoBehaviour
     {
         interactAction.Disable();
     }
-
-    private void Update()
+private void Update()
+{
+    // Handle player interaction with the vending machine
+    if (isPlayerNearby && interactAction.triggered && !fallStarted)
     {
-        if (isPlayerNearby && interactAction.triggered && !fallStarted)
+        if (!machineUnlocked)
         {
-            if (!machineUnlocked)
-            {
-                ShakeVendingMachine();
-            }
-        }
-
-        if (cutsceneActive && squirrel != null)
-        {
-            // Logic for when the squirrel is talking (you can trigger animations or voice lines here)
+            ShakeVendingMachine();
         }
     }
+
+    // Handle cutscene events
+    if (cutsceneActive && squirrel != null)
+    {
+        // Logic for when the squirrel is talking (you can trigger animations or voice lines here)
+    }
+
+    // Make the squirrel follow the player if following is enabled
+    if (isFollowingPlayer && player != null)
+    {
+        FollowPlayer();
+    }
+}
+
+    // private void Update()
+    // {
+    //     if (isPlayerNearby && interactAction.triggered && !fallStarted)
+    //     {
+    //         if (!machineUnlocked)
+    //         {
+    //             ShakeVendingMachine();
+    //         }
+    //     }
+
+    //     if (cutsceneActive && squirrel != null)
+    //     {
+    //         // Logic for when the squirrel is talking (you can trigger animations or voice lines here)
+    //     }
+    // }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -264,30 +301,70 @@ public class VendingMachineInteractable : MonoBehaviour
             player.GetComponent<CharacterMovement>().enabled = true; // Re-enable movement
         }
 
-        // Start the squirrel walking away after the cutscene
-        StartCoroutine(SquirrelWalkAway());
+        // Start following the player instead of walking away
+        Invoke(nameof(StartFollowingPlayer), 1f); // Delay before following starts
     }
 
-    private IEnumerator SquirrelWalkAway()
+private void StartFollowingPlayer()
+{
+    isFollowingPlayer = true; // Enable following
+}
+
+// private void Update()
+// {
+//     if (isFollowingPlayer && player != null)
+//     {
+//         FollowPlayer();
+//     }
+// }
+
+private void FollowPlayer()
+{
+    if (squirrel == null || player == null) return;
+
+    float distanceToPlayer = Vector3.Distance(squirrel.transform.position, player.transform.position);
+
+    if (distanceToPlayer > followDistance)
     {
-        Vector3 startPosition = squirrel.transform.position;
-        Vector3 endPosition = new Vector3(-10f, squirrel.transform.position.y, squirrel.transform.position.z); // Exit point
+        // Move towards the player
+        Vector3 direction = (player.transform.position - squirrel.transform.position).normalized;
+        squirrel.transform.position += direction * followSpeed * Time.deltaTime;
 
-        float elapsedTime = 0f;
-
-        while (elapsedTime < 5f) // Time it takes to walk away
+        // Set walking animation if Animator is attached
+        if (squirrelAnimator != null)
         {
-            squirrel.transform.position = Vector3.Lerp(startPosition, endPosition, elapsedTime / 5f);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-
-        squirrel.transform.position = endPosition;
-
-        // Optionally, you can disable the squirrel once it reaches the exit
-        if (squirrel != null)
-        {
-            squirrel.SetActive(false); // Squirrel exits the scene
+            squirrelAnimator.SetBool("isWalking", true);
         }
     }
+    else
+    {
+        // Stop moving when close enough
+        if (squirrelAnimator != null)
+        {
+            squirrelAnimator.SetBool("isWalking", false);
+        }
+    }
+}
+    // private IEnumerator SquirrelWalkAway()
+    // {
+    //     Vector3 startPosition = squirrel.transform.position;
+    //     Vector3 endPosition = new Vector3(-10f, squirrel.transform.position.y, squirrel.transform.position.z); // Exit point
+
+    //     float elapsedTime = 0f;
+
+    //     while (elapsedTime < 5f) // Time it takes to walk away
+    //     {
+    //         squirrel.transform.position = Vector3.Lerp(startPosition, endPosition, elapsedTime / 5f);
+    //         elapsedTime += Time.deltaTime;
+    //         yield return null;
+    //     }
+
+    //     squirrel.transform.position = endPosition;
+
+    //     // Optionally, you can disable the squirrel once it reaches the exit
+    //     if (squirrel != null)
+    //     {
+    //         squirrel.SetActive(false); // Squirrel exits the scene
+    //     }
+    // }
 }
