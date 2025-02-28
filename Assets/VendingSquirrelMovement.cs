@@ -24,6 +24,9 @@ public class VendingSquirrelMovement : MonoBehaviour
                 Vector3 direction = (player.transform.position - transform.position).normalized;
                 transform.Translate(direction * followSpeed * Time.deltaTime, Space.World);
 
+                // Rotate to face the player smoothly
+                RotateTowardsPlayer();
+
                 // Set walking animation
                 squirrelAnimator.SetBool("isWalking", true);
             }
@@ -32,6 +35,18 @@ public class VendingSquirrelMovement : MonoBehaviour
                 // Stop walking animation when close enough
                 squirrelAnimator.SetBool("isWalking", false);
             }
+        }
+    }
+
+    private void RotateTowardsPlayer()
+    {
+        Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
+        directionToPlayer.y = 0; // Keep rotation only on the Y-axis
+
+        if (directionToPlayer != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f); // Faster rotation
         }
     }
 }

@@ -21,7 +21,7 @@ public class VendingMachineInteractable : MonoBehaviour
     public float squirrelWalkSpeed = 1.5f; // Speed at which squirrel walks away
 
 //NEW 1/27
-    private Animator squirrelAnimator;  
+    //private Animator squirrelAnimator;  
     public float followDistance = 1.5f; // Distance at which squirrel stops following
     public float followSpeed = 2f; // Speed at which squirrel follows the player
     private bool isFollowingPlayer = false; // Check if the squirrel should follow the player
@@ -41,11 +41,11 @@ public class VendingMachineInteractable : MonoBehaviour
     {
         vendingMachineRigidbody = GetComponentInParent<Rigidbody>(); // Get the Rigidbody on the parent
 
-        // Assign the squirrel's Animator
-            if (squirrel != null)
-            {
-                squirrelAnimator = squirrel.GetComponent<Animator>();
-            }
+        //// Assign the squirrel's Animator
+        //    if (squirrel != null)
+        //    {
+        //        squirrelAnimator = squirrel.GetComponent<Animator>();
+        //    }
 
         // Initially hide all UI elements
         if (interactionPrompt != null) interactionPrompt.SetActive(false);
@@ -85,11 +85,11 @@ private void Update()
         // Logic for when the squirrel is talking (you can trigger animations or voice lines here)
     }
 
-    // Make the squirrel follow the player if following is enabled
-    if (isFollowingPlayer && player != null)
-    {
-        FollowPlayer();
-    }
+    //// Make the squirrel follow the player if following is enabled
+    //if (isFollowingPlayer && player != null)
+    //{
+    //    FollowPlayer();
+    //}
 }
 
     // private void Update()
@@ -318,33 +318,37 @@ private void StartFollowingPlayer()
 //     }
 // }
 
-private void FollowPlayer()
-{
-    if (squirrel == null || player == null) return;
 
-    float distanceToPlayer = Vector3.Distance(squirrel.transform.position, player.transform.position);
+//MOVED to VendingSquirrelMovement
+//private void FollowPlayer()
+//{
+//    if (squirrel == null || player == null) return;
 
-    if (distanceToPlayer > followDistance)
-    {
-        // Move towards the player
-        Vector3 direction = (player.transform.position - squirrel.transform.position).normalized;
-        squirrel.transform.position += direction * followSpeed * Time.deltaTime;
+//    float distanceToPlayer = Vector3.Distance(squirrel.transform.position, player.transform.position);
 
-        // Set walking animation if Animator is attached
-        if (squirrelAnimator != null)
-        {
-            squirrelAnimator.SetBool("isWalking", true);
-        }
-    }
-    else
-    {
-        // Stop moving when close enough
-        if (squirrelAnimator != null)
-        {
-            squirrelAnimator.SetBool("isWalking", false);
-        }
-    }
-}
+//    if (distanceToPlayer > followDistance)
+//    {
+//        // Move towards the player
+//        Vector3 direction = (player.transform.position - squirrel.transform.position).normalized;
+//        squirrel.transform.position += direction * followSpeed * Time.deltaTime;
+
+//        // Set walking animation if Animator is attached
+//        if (squirrelAnimator != null)
+//        {
+//            squirrelAnimator.SetBool("isWalking", true);
+//        }
+//    }
+//    else
+//    {
+//        // Stop moving when close enough
+//        if (squirrelAnimator != null)
+//        {
+//            squirrelAnimator.SetBool("isWalking", false);
+//        }
+//    }
+//}
+
+
     // private IEnumerator SquirrelWalkAway()
     // {
     //     Vector3 startPosition = squirrel.transform.position;
