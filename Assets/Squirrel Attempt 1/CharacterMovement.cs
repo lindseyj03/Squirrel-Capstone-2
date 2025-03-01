@@ -7,16 +7,30 @@ public class CharacterMovement : MonoBehaviour
     public float walkSpeed = 5f;
     public float runSpeed = 10f;
 
+    //jump 
+    public float jumpForce = 5f; // Added jump force
+
     private Vector2 currentMovement;
     private bool movementPressed;
     private bool runPressed;
 
+    //jump 
+    private bool isGrounded = true; // Tracks if the player is on the ground
+    private Rigidbody rb; // Add this to declare the Rigidbody
+
+
+
     private PlayerInput input;
     private Transform cameraTransform;
+   
 
     void Awake()
     {
         input = new PlayerInput();
+
+        //jump
+        rb = GetComponent<Rigidbody>(); // Already have Rigidbody
+
 
         cameraTransform = Camera.main.transform; // Reference to the camera's transform
 
@@ -36,6 +50,9 @@ public class CharacterMovement : MonoBehaviour
         // Run input: detect if the run button is pressed
         input.CharacterControls.Run.performed += ctx => runPressed = ctx.ReadValueAsButton();
         input.CharacterControls.Run.canceled += ctx => runPressed = false;
+
+        //jump
+        input.CharacterControls.Jump.performed += ctx => Jump(); // Added jump input
     }
 
     void Start()
@@ -50,6 +67,20 @@ public class CharacterMovement : MonoBehaviour
     {
         HandleMovement();
         HandleRotation();
+
+        //jump
+        // If the player is falling or slightly moving downward, allow jumping again
+        if (!isGrounded && rb.linearVelocity.y <= 0.1f)
+        {
+            RaycastHit hit;
+            float groundCheckDistance = 0.2f; // Adjust this value if needed
+
+            if (Physics.Raycast(transform.position, Vector3.down, out hit, groundCheckDistance))
+            {
+                isGrounded = true;
+            }
+        }
+
     }
 
     void HandleMovement()
@@ -60,8 +91,12 @@ public class CharacterMovement : MonoBehaviour
         bool isWalking = movementPressed && !runPressed;
         bool isRunning = movementPressed && runPressed;
 
+
+
         animator.SetBool("isWalking", isWalking);
         animator.SetBool("isRunning", isRunning);
+
+
 
         // Move the character
         if (movementPressed)
@@ -94,6 +129,23 @@ public class CharacterMovement : MonoBehaviour
                 // Apply smooth rotation to the player itself
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
             }
+        }
+    }
+    //jump
+    void Jump()
+    {
+        if (isGrounded)
+        {
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
+            isGrounded = false;
+        }
+    }
+    //jump
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground")) // Ensure ground has "Ground" tag
+        {
+            isGrounded = true;
         }
     }
 
