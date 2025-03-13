@@ -12,7 +12,7 @@ public class VendingMachineInteractable : MonoBehaviour
     public GameObject permanentTaskList; // New task list that stays on screen
 
     public int requiredShakes = 3;
-    public float additionalTextDuration = 2f;
+    public float additionalTextDuration = 4f;
     public float shakeAngle = 10f;
     public float shakeSpeed = 0.2f;
     public float resetSpeed = 0.3f;
@@ -205,7 +205,7 @@ private void Update()
         SquirrelFallOut();
 
         // Delay before starting the cutscene
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.1f);
 
         // Enable the squirrel and show the new task list after the fall
         if (squirrel != null) squirrel.SetActive(true);
