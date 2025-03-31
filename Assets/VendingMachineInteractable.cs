@@ -24,7 +24,7 @@ public class VendingMachineInteractable : MonoBehaviour
     //private Animator squirrelAnimator;  
     public float followDistance = 1.5f; // Distance at which squirrel stops following
     public float followSpeed = 2f; // Speed at which squirrel follows the player
-    private bool isFollowingPlayer = false; // Check if the squirrel should follow the player
+    //private bool isFollowingPlayer = false; // Check if the squirrel should follow the player
 //END OF NEW 1/27
 
 
@@ -302,12 +302,12 @@ private void Update()
         }
 
         // Start following the player instead of walking away
-        Invoke(nameof(StartFollowingPlayer), 1f); // Delay before following starts
+        //Invoke(nameof(StartFollowingPlayer), 1f); // Delay before following starts
     }
 
 private void StartFollowingPlayer()
 {
-    isFollowingPlayer = true; // Enable following
+    //isFollowingPlayer = true; // Enable following
 }
 
 // private void Update()
