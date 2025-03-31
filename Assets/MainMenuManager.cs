@@ -1,28 +1,25 @@
+//using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class MainMenuManager : MonoBehaviour
 {
-    public GameObject mainMenu; // Assign the MainMenu parent
-    public GameObject startButton; // Assign the StartButton (for UI focus)
-    public InputAction interactAction; // Assign the interact action
+    public GameObject mainMenu; // Main Menu UI
+    public GameObject startButton; // First button to be selected
+    public CutsceneManager cutsceneManager; // Reference to CutsceneManager
+    public InputAction interactAction; // Interact action
 
     void Start()
     {
-        // Ensure menu is visible and game is paused at the start
         mainMenu.SetActive(true);
         EventSystem.current.SetSelectedGameObject(startButton);
-        Time.timeScale = 0; // Pause the game while in menu
-        Debug.Log("Game Paused: " + Time.timeScale);
-
-        // Enable the interact action
+        Time.timeScale = 0; // Pause game
         interactAction.Enable();
     }
 
     void Update()
     {
-        // Check if the interact action was triggered
         if (interactAction.triggered)
         {
             StartGame();
@@ -31,18 +28,22 @@ public class MainMenuManager : MonoBehaviour
 
     public void StartGame()
     {
-        mainMenu.SetActive(false); // Hide menu
-
-        // Debug log to ensure this part is triggered
-        Debug.Log("Starting Game, unpausing...");
-
-        Time.timeScale = 1; // Resume game
-        Debug.Log("Game Unpaused: " + Time.timeScale);
+        mainMenu.SetActive(false); // Hide main menu
+        Time.timeScale = 0.75f; // Resume game now that cutscene starts
+        cutsceneManager.StartCutsceneWithFade(); // Start cutscene and trigger the fade to black
     }
+
+    //private IEnumerator ResumeAfterFade()
+    //{
+    //    // Wait until the fade has completed
+    //    yield return new WaitForSeconds(5f); // Wait for fade duration (adjust as needed)
+
+    //    // Now resume the game
+    //    Time.timeScale = 1;
+    //}
 
     private void OnDisable()
     {
-        // Disable the interact action when the script is disabled
-        interactAction.Disable();
+        interactAction.Disable(); // Disable interact action when Main Menu is disabled
     }
 }
