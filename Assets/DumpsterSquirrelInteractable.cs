@@ -8,6 +8,7 @@ public class DumpsterSquirrelInteractable : MonoBehaviour
     public GameObject squirrel;
     public GameObject player;
     private bool cutsceneActive = false;
+    private bool isCollected = false;
 
     private void Start()
     {
@@ -27,6 +28,10 @@ public class DumpsterSquirrelInteractable : MonoBehaviour
 
     private IEnumerator TriggerCutscene()
     {
+
+        if (isCollected) yield break; //  Prevents counting the same squirrel multiple times
+
+
         cutsceneActive = true;
 
         // Disable player movement during cutscene
@@ -50,6 +55,13 @@ public class DumpsterSquirrelInteractable : MonoBehaviour
                 movementScript.isFollowingPlayer = true; // Enable squirrel follow behavior
             }
         }
+
+
+        isCollected = true; //  Marks this squirrel as found
+
+        // Register this squirrel in the tracker
+        SquirrelTracker.instance.FoundSquirrel(gameObject.name);
+
 
         // Re-enable player movement after cutscene
         if (player != null)

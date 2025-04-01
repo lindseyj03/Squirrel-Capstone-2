@@ -35,6 +35,8 @@ public class VendingMachineInteractable : MonoBehaviour
     private Rigidbody vendingMachineRigidbody;
     private bool cutsceneActive = false;
 
+    private bool isCollected = false; // Marks whether the squirrel has been collected
+
     public InputAction interactAction;
 
     private void Start()
@@ -231,7 +233,9 @@ private void Update()
         // Make sure the squirrel is deactivated initially
         if (squirrel != null)
         {
-            squirrel.SetActive(true);  // Make squirrel visible immediately
+            if (!isCollected) // Check if the squirrel has already been collected
+            { 
+                squirrel.SetActive(true);  // Make squirrel visible immediately
 
             Rigidbody squirrelRb = squirrel.GetComponent<Rigidbody>();
             if (squirrelRb != null)
@@ -242,9 +246,12 @@ private void Update()
 
                 // Get direction towards the player (this is the direction we will throw the squirrel)
                 Vector3 directionToPlayer = (player.transform.position - squirrel.transform.position).normalized;
+                }
+                isCollected = true; // Mark as collected to prevent collection again
+                SquirrelTracker.instance.FoundSquirrel(gameObject.name); // Register the squirrel as found    
 
-                // Apply an impulse to throw the squirrel out towards the player
-                squirrelRb.AddForce(directionToPlayer * squirrelThrowForce, ForceMode.Impulse);
+                //// Apply an impulse to throw the squirrel out towards the player
+                //squirrelRb.AddForce(directionToPlayer * squirrelThrowForce, ForceMode.Impulse);
             }
 
             // Rotate the squirrel to face the player after being thrown
