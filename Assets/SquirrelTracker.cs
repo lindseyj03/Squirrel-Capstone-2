@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class SquirrelTracker : MonoBehaviour
 {
@@ -8,20 +9,31 @@ public class SquirrelTracker : MonoBehaviour
     private int totalSquirrels = 4;
 
     public GameObject exitTunnel;
-
-    // Array of Image references for each squirrel found
     public Image[] squirrelImages;
+    public Text tunnelMessage; // Reference to the UI Text element for messages
 
-    // Public getter for squirrelsFound
-    public int SquirrelsFound
+    public int SquirrelsFound => squirrelsFound;
+    public int TotalSquirrels => totalSquirrels;
+
+    private void Start()
     {
-        get { return squirrelsFound; }
+        HideSquirrelImages();
     }
 
-    // Public getter for totalSquirrels
-    public int TotalSquirrels
+    public void HideSquirrelImages()
     {
-        get { return totalSquirrels; }
+        foreach (var img in squirrelImages)
+        {
+            img.gameObject.SetActive(false); // Hide all images at the start
+        }
+    }
+
+    public void ShowSquirrelImages()
+    {
+        foreach (var img in squirrelImages)
+        {
+            img.gameObject.SetActive(true); // Show images after cutscene
+        }
     }
 
     private void Awake()
@@ -33,6 +45,12 @@ public class SquirrelTracker : MonoBehaviour
         else
         {
             Destroy(gameObject);
+        }
+
+        // Ensure the message is hidden at start
+        if (tunnelMessage != null)
+        {
+            tunnelMessage.gameObject.SetActive(false);
         }
     }
 
@@ -46,21 +64,48 @@ public class SquirrelTracker : MonoBehaviour
 
     private void UpdateSquirrelImages()
     {
-        // Hide all images first
         foreach (var img in squirrelImages)
         {
             img.gameObject.SetActive(false);
         }
 
-        // Show the images for the squirrels found so far
+        if (squirrelsFound == 0)
+        {
+            if (squirrelImages.Length > 0)
+            {
+                squirrelImages[0].gameObject.SetActive(true);
+            }
+            return;
+        }
+
         for (int i = 0; i < squirrelsFound; i++)
         {
             if (i < squirrelImages.Length)
             {
-                squirrelImages[i].gameObject.SetActive(true); // Show the image for the squirrel
+                squirrelImages[i].gameObject.SetActive(true);
             }
         }
     }
+
+    public void TryToGoToTunnel()
+    {
+        if (squirrelsFound >= totalSquirrels)
+        {
+            // All squirrels found, start the ending cutscene
+            EndingCutsceneManager.instance.StartEndingCutscene();
+        }
+        else
+        {
+            // Not all squirrels found, show a message
+            if (tunnelMessage != null)
+            {
+                tunnelMessage.gameObject.SetActive(true);
+                tunnelMessage.text = "You can't leave yet! Find all the squirrels first!";
+                tunnelMessage.color = Color.white;
+            }
+        }
+    }
+
 
     private void CheckIfAllFound()
     {
@@ -70,6 +115,14 @@ public class SquirrelTracker : MonoBehaviour
             if (exitTunnel != null)
             {
                 exitTunnel.SetActive(true);
+            }
+
+            // Show the tunnel message
+            if (tunnelMessage != null)
+            {
+                tunnelMessage.gameObject.SetActive(true);
+                tunnelMessage.text = "All squirrels found! Go to the tunnel!";
+                tunnelMessage.color = Color.white; // Set the text color to white
             }
         }
     }

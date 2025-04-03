@@ -111,13 +111,16 @@ public class CutsceneManager : MonoBehaviour
 
     void EndCutscene()
     {
-        cutsceneImage.gameObject.SetActive(false); // Hide the cutscene image
-        skipButton.gameObject.SetActive(false); // Hide the skip button
-        interactAction.Disable(); // Disable the interact action after the cutscene ends
+        cutsceneImage.gameObject.SetActive(false);
+        skipButton.gameObject.SetActive(false);
+        interactAction.Disable();
 
-        Time.timeScale = 1; // Resume game and allow gameplay
-        blackFadePanel.SetActive(true); // Ensure black panel is active at the end of cutscene
-        StartCoroutine(FadeOutToGameplay()); // Fade back to gameplay after cutscene
+        Time.timeScale = 1;
+        blackFadePanel.SetActive(true);
+        StartCoroutine(FadeOutToGameplay());
+
+        // Show squirrel images after cutscene
+        SquirrelTracker.instance.ShowSquirrelImages();
     }
 
     IEnumerator FadeOutToGameplay()

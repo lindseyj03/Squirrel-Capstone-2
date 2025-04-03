@@ -2,23 +2,24 @@ using UnityEngine;
 
 public class ExitTrigger : MonoBehaviour
 {
-    // You may want to call the TryToExit method when the player triggers the exit area.
+    // Reference to the SquirrelTracker to manipulate UI and game logic
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            // Directly check if the player has found all squirrels
-            if (SquirrelTracker.instance.SquirrelsFound >= SquirrelTracker.instance.TotalSquirrels)
+            // Trigger the message when the player enters the trigger area
+            SquirrelTracker.instance.TryToGoToTunnel();
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            // When the player exits the trigger area, hide the "You can't leave yet" message
+            if (SquirrelTracker.instance.tunnelMessage != null)
             {
-                Debug.Log("All squirrels found! You can now exit.");
-                if (SquirrelTracker.instance.exitTunnel != null)
-                {
-                    SquirrelTracker.instance.exitTunnel.SetActive(true);
-                }
-            }
-            else
-            {
-                Debug.Log("You still need to find more squirrels before you can exit.");
+                SquirrelTracker.instance.tunnelMessage.gameObject.SetActive(false);
             }
         }
     }
