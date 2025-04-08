@@ -3187,6 +3187,9 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 86f6b0fb7a70bbd4fa64949de31766d0, type: 3}
   - {fileID: 21300000, guid: 639682040bfdcc041a24f5270633cf0e, type: 3}
   - {fileID: 21300000, guid: 278403bd0cd92174689d6224a70375af, type: 3}
+  - {fileID: 21300000, guid: 3b5b9ef98491c4afe84006d96e539c3a, type: 3}
+  - {fileID: 21300000, guid: 430b4865cf9514588a57a10c03615a46, type: 3}
+  - {fileID: 21300000, guid: 0bf089ae696cf49739664d871b713f27, type: 3}
   skipButton: {fileID: 842557568}
   interactAction:
     m_Name: Interact
