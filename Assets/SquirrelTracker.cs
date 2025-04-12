@@ -126,4 +126,15 @@ public class SquirrelTracker : MonoBehaviour
             }
         }
     }
+
+    public void HideTrackerUI()
+    {
+        HideSquirrelImages();
+
+        if (tunnelMessage != null)
+        {
+            tunnelMessage.gameObject.SetActive(false);
+        }
+    }
+
 }

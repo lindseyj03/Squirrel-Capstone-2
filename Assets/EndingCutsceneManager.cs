@@ -1,50 +1,67 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using System.Collections;
-using TMPro;
+using UnityEngine.SceneManagement;
 
 public class EndingCutsceneManager : MonoBehaviour
 {
-    public static EndingCutsceneManager instance; // Add this static instance
-    public Image cutsceneImage; // The image for the cutscene sprite
-    public Sprite[] cutsceneSprites; // Array of cutscene sprites for the ending
-    public GameObject blackFadePanel; // Panel for the fade-to-black effect
-    public TextMeshProUGUI endMessageText; // Use TextMeshProUGUI for the end message text
+    public static EndingCutsceneManager instance;
+
+    public Image cutsceneImage;
+    public Sprite[] cutsceneSprites;
+    public GameObject blackFadePanel;
+    public Button skipButton;
+    public InputAction interactAction;
 
     private int currentImageIndex = 0;
+    private bool cutsceneActive = false;
 
     void Awake()
     {
-        // Ensure only one instance exists and make it accessible globally
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        if (instance == null) instance = this;
+        else Destroy(gameObject);
 
-        cutsceneImage.gameObject.SetActive(false); // Initially hide the cutscene image
-        blackFadePanel.SetActive(false); // Hide black fade panel at start
-        endMessageText.gameObject.SetActive(false); // Hide end message text at the start
+        cutsceneImage.gameObject.SetActive(false);
+        blackFadePanel.SetActive(true);
+        skipButton.gameObject.SetActive(false);
+        interactAction.Disable();
+    }
+
+    void OnEnable()
+    {
+        interactAction.Enable();
+        interactAction.performed += OnInteract;
+    }
+
+    void OnDisable()
+    {
+        interactAction.performed -= OnInteract;
+        interactAction.Disable();
+    }
+
+    void Start()
+    {
+        skipButton.onClick.AddListener(NextImage);
     }
 
     public void StartEndingCutscene()
     {
+        // Hide squirrel UI before beginning the cutscene
+        if (SquirrelTracker.instance != null)
+        {
+            SquirrelTracker.instance.HideTrackerUI();
+        }
+
         StartCoroutine(FadeInFromBlack());
     }
 
     IEnumerator FadeInFromBlack()
     {
-        // Fade from black to reveal the cutscene
         CanvasGroup canvasGroup = blackFadePanel.GetComponent<CanvasGroup>();
         float elapsedTime = 0f;
-        float fadeDuration = 1f; // Fade duration
+        float fadeDuration = 1f;
 
-        blackFadePanel.SetActive(true); // Show black panel at the start
-
-        // Fade in from black
         while (elapsedTime < fadeDuration)
         {
             elapsedTime += Time.deltaTime;
@@ -53,15 +70,13 @@ public class EndingCutsceneManager : MonoBehaviour
         }
 
         canvasGroup.alpha = 0f;
-        blackFadePanel.SetActive(false); // Hide the black panel
+        blackFadePanel.SetActive(false);
 
-        // Start the cutscene images
         cutsceneImage.gameObject.SetActive(true);
-        ShowImage();
+        skipButton.gameObject.SetActive(true);
+        cutsceneActive = true;
 
-        // Wait a moment before showing each image
-        yield return new WaitForSeconds(1f);
-        ShowNextImage();
+        ShowImage();
     }
 
     void ShowImage()
@@ -72,38 +87,38 @@ public class EndingCutsceneManager : MonoBehaviour
         }
     }
 
-    void ShowNextImage()
+    public void NextImage()
     {
+        if (!cutsceneActive) return;
+
         if (currentImageIndex < cutsceneSprites.Length - 1)
         {
-            currentImageIndex++; // Go to the next image in the array
+            currentImageIndex++;
             ShowImage();
-            StartCoroutine(WaitBeforeNextImage());
         }
         else
         {
-            // End the cutscene and show the message
             StartCoroutine(FadeToBlack());
         }
     }
 
-    IEnumerator WaitBeforeNextImage()
+    void OnInteract(InputAction.CallbackContext context)
     {
-        // Wait for a short time before showing the next image
-        yield return new WaitForSeconds(1.5f);
-        ShowNextImage();
+        NextImage();
     }
 
     IEnumerator FadeToBlack()
     {
-        // Fade to black before ending the game
+        cutsceneActive = false;
+        interactAction.Disable();
+        skipButton.gameObject.SetActive(false);
+
+        // Fade to black effect
         CanvasGroup canvasGroup = blackFadePanel.GetComponent<CanvasGroup>();
+        blackFadePanel.SetActive(true); // Activate the black fade panel
         float elapsedTime = 0f;
-        float fadeDuration = 1f; // Fade duration
+        float fadeDuration = 1f;
 
-        blackFadePanel.SetActive(true); // Show black panel for fade
-
-        // Fade to black
         while (elapsedTime < fadeDuration)
         {
             elapsedTime += Time.deltaTime;
@@ -111,21 +126,50 @@ public class EndingCutsceneManager : MonoBehaviour
             yield return null;
         }
 
-        canvasGroup.alpha = 1f;
+        canvasGroup.alpha = 1f; // Ensure it's fully black.
 
-        // Show the ending message once the cutscene is over
-        endMessageText.gameObject.SetActive(true);
-        endMessageText.text = "All squirrels found! You win!";
+        // Now the screen is fully black, and the UI elements like cutscene image are hidden.
+        cutsceneImage.gameObject.SetActive(false);
+        skipButton.gameObject.SetActive(false);
 
-        // Here, you can add code to end the game, load a new scene, or show an end screen
-        EndGame();
+        // After fading to black, we don't do anything else until the game resets.
+        // We will wait for the game reset here.
+        StartCoroutine(WaitForReset()); // This will wait for a moment before resetting the scene.
     }
 
-    void EndGame()
+    IEnumerator WaitForReset()
     {
-        // End the game (You can load a new scene, show a "game over" screen, etc.)
-        Debug.Log("Game Over! You found all the squirrels!");
-        // Example: Load an end game scene or show a message
-        // SceneManager.LoadScene("EndGameScene");
+        yield return new WaitForSeconds(2f); // Wait for 2 seconds (or any duration you want) before resetting.
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Reset the game by reloading the scene.
     }
+
+    void EndCutscene()
+    {
+        Debug.Log("Game Over! You found all the squirrels!");
+        // Reset the image index to 0 so the cutscene restarts at the first image.
+        currentImageIndex = 0;
+        StartCoroutine(FadeOutToGameplay());
+    }
+
+    IEnumerator FadeOutToGameplay()
+    {
+        CanvasGroup canvasGroup = blackFadePanel.GetComponent<CanvasGroup>();
+        float elapsedTime = 0f;
+        float fadeDuration = 1f;
+
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            canvasGroup.alpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeDuration);
+            yield return null;
+        }
+
+        canvasGroup.alpha = 0f;
+        blackFadePanel.SetActive(false);
+
+        // Optional: trigger something else here like a results screen or credits
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+    }
+
 }
