@@ -9,7 +9,7 @@ public class VendingMachineInteractable : MonoBehaviour
     public GameObject taskListText; // Dialog Text (appears and disappears)
     public GameObject squirrel;
     public GameObject player;
-    public GameObject permanentTaskList; // New task list that stays on screen
+    // public GameObject permanentTaskList; // New task list that stays on screen
 
     public int requiredShakes = 3;
     public float additionalTextDuration = 4f;
@@ -37,7 +37,13 @@ public class VendingMachineInteractable : MonoBehaviour
 
     private bool isCollected = false; // Marks whether the squirrel has been collected
 
+    //shaking clue
+    private Coroutine idleShakeCoroutine;
+    private bool stopIdleShake = false;
+    private Quaternion originalRotation;
+    private Vector3 originalPosition;
     public InputAction interactAction;
+    
 
     private void Start()
     {
@@ -54,11 +60,18 @@ public class VendingMachineInteractable : MonoBehaviour
         if (additionalText != null) additionalText.SetActive(false);
         if (taskListText != null) taskListText.SetActive(false);
         if (squirrel != null) squirrel.SetActive(false);
-        if (permanentTaskList != null) permanentTaskList.SetActive(false); // Hide permanent task list initially
+        // if (permanentTaskList != null) permanentTaskList.SetActive(false); // Hide permanent task list initially
 
         // Disable gravity and set kinematic to true initially
         vendingMachineRigidbody.isKinematic = true;
         vendingMachineRigidbody.useGravity = false;
+
+        //shaking clue
+        idleShakeCoroutine = StartCoroutine(IdleShake());
+        originalRotation = transform.rotation;
+            originalPosition = transform.position;
+
+            StartCoroutine(IdleShake());
     }
 
     private void OnEnable()
@@ -148,6 +161,14 @@ private void Update()
         {
             StartCoroutine(FallOver());
         }
+
+        //shaking clue 
+        if (!stopIdleShake)
+        {
+            stopIdleShake = true;
+            if (idleShakeCoroutine != null) StopCoroutine(idleShakeCoroutine);
+            transform.rotation = Quaternion.identity; // Reset rotation just in case
+        }
     }
 
     private IEnumerator RockMachine()
@@ -166,6 +187,63 @@ private void Update()
 
         transform.rotation = Quaternion.Lerp(originalRotation, originalRotation, resetSpeed); // Reset to original
     }
+
+    //shaking clue 
+   private IEnumerator IdleShake()
+{
+    Quaternion originalRotation = transform.rotation;
+    Vector3 originalPosition = transform.position;
+
+    while (!stopIdleShake)
+    {
+        // Wait a shorter, more random time
+        float waitTime = Random.Range(0.8f, 1.5f);
+        yield return new WaitForSeconds(waitTime);
+
+        // Exaggerated shake
+        float angle = Random.Range(-10f, 10f); // Larger tilt
+        Quaternion tilt = Quaternion.Euler(originalRotation.eulerAngles.x, originalRotation.eulerAngles.y, angle);
+        
+        // Optional vertical nudge
+        float verticalOffset = Random.Range(0.02f, 0.05f);
+        Vector3 bounceUp = originalPosition + new Vector3(0f, verticalOffset, 0f);
+
+        float t = 0f;
+        float speed = 5f; // Faster shake
+        while (t < 1f)
+        {
+            transform.rotation = Quaternion.Lerp(originalRotation, tilt, t);
+            transform.position = Vector3.Lerp(originalPosition, bounceUp, t);
+            t += Time.deltaTime * speed;
+            yield return null;
+        }
+
+        // Return to original
+        t = 0f;
+        while (t < 1f)
+        {
+            transform.rotation = Quaternion.Lerp(tilt, originalRotation, t);
+            transform.position = Vector3.Lerp(bounceUp, originalPosition, t);
+            t += Time.deltaTime * speed;
+            yield return null;
+        }
+    }
+
+    // Final reset
+    transform.rotation = originalRotation;
+    transform.position = originalPosition;
+}
+
+// Example: call this when you start interacting with the object
+public void OnInteract()
+{
+    stopIdleShake = true; // This should stop the coroutine
+
+    // Force reset just in case the coroutine is mid-shake
+    transform.rotation = originalRotation;
+    transform.position = originalPosition;
+}
+
 
     private IEnumerator FallOver()
     {
@@ -215,7 +293,7 @@ private void Update()
 
         // Show the permanent task list after dialog text disappears
         yield return new WaitForSeconds(additionalTextDuration); // Wait for dialog text to finish
-        if (permanentTaskList != null) permanentTaskList.SetActive(true); // Show permanent task list
+        // if (permanentTaskList != null) permanentTaskList.SetActive(true); // Show permanent task list
     }
 
     private void HideTaskListText()

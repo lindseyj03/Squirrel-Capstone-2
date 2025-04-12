@@ -11,6 +11,7 @@ public class SquirrelTracker : MonoBehaviour
     public GameObject exitTunnel;
     public Image[] squirrelImages;
     public Text tunnelMessage; // Reference to the UI Text element for messages
+    public TextMeshProUGUI findSquirrelsMessage; 
 
     public int SquirrelsFound => squirrelsFound;
     public int TotalSquirrels => totalSquirrels;
@@ -18,6 +19,11 @@ public class SquirrelTracker : MonoBehaviour
     private void Start()
     {
         HideSquirrelImages();
+         
+        if (findSquirrelsMessage != null)
+        {
+            findSquirrelsMessage.gameObject.SetActive(false); // Hide at start
+        }
     }
 
     public void HideSquirrelImages()
@@ -33,6 +39,12 @@ public class SquirrelTracker : MonoBehaviour
         foreach (var img in squirrelImages)
         {
             img.gameObject.SetActive(true); // Show images after cutscene
+        }
+
+        if (findSquirrelsMessage != null)
+        {
+            findSquirrelsMessage.gameObject.SetActive(true);
+            findSquirrelsMessage.text = "Find all the squirrels!";
         }
     }
 
@@ -123,6 +135,11 @@ public class SquirrelTracker : MonoBehaviour
                 tunnelMessage.gameObject.SetActive(true);
                 tunnelMessage.text = "All squirrels found! Go to the tunnel!";
                 tunnelMessage.color = Color.white; // Set the text color to white
+            }
+             // Hide the "find all the squirrels" message
+            if (findSquirrelsMessage != null)
+            {
+                findSquirrelsMessage.gameObject.SetActive(false);
             }
         }
     }

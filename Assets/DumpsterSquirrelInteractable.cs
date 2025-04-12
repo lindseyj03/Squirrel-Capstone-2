@@ -4,7 +4,6 @@ using System.Collections;
 public class DumpsterSquirrelInteractable : MonoBehaviour
 {
     public GameObject cutsceneText;
-    public GameObject followText;
     public GameObject squirrel;
     public GameObject player;
     private bool cutsceneActive = false;
@@ -13,7 +12,6 @@ public class DumpsterSquirrelInteractable : MonoBehaviour
     private void Start()
     {
         if (cutsceneText != null) cutsceneText.SetActive(false);
-        if (followText != null) followText.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -28,9 +26,7 @@ public class DumpsterSquirrelInteractable : MonoBehaviour
 
     private IEnumerator TriggerCutscene()
     {
-
-        if (isCollected) yield break; //  Prevents counting the same squirrel multiple times
-
+        if (isCollected) yield break; // Prevents counting the same squirrel multiple times
 
         cutsceneActive = true;
 
@@ -43,7 +39,6 @@ public class DumpsterSquirrelInteractable : MonoBehaviour
         // Shorter cutscene for testing purposes
         if (cutsceneText != null) cutsceneText.SetActive(true);
         yield return new WaitForSeconds(1f); // Shorten cutscene time for debugging
-
         if (cutsceneText != null) cutsceneText.SetActive(false);
 
         // Enable following behavior immediately after cutscene
@@ -52,16 +47,14 @@ public class DumpsterSquirrelInteractable : MonoBehaviour
             DumpsterSquirrelMovement movementScript = squirrel.GetComponent<DumpsterSquirrelMovement>();
             if (movementScript != null)
             {
-                movementScript.isFollowingPlayer = true; // Enable squirrel follow behavior
+                movementScript.isFollowingPlayer = true;
             }
         }
 
-
-        isCollected = true; //  Marks this squirrel as found
+        isCollected = true; // Marks this squirrel as found
 
         // Register this squirrel in the tracker
         SquirrelTracker.instance.FoundSquirrel(gameObject.name);
-
 
         // Re-enable player movement after cutscene
         if (player != null)
@@ -70,6 +63,7 @@ public class DumpsterSquirrelInteractable : MonoBehaviour
         }
     }
 }
+
 
 
 //using UnityEngine;

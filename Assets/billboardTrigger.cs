@@ -67,7 +67,7 @@ public class BillboardTrigger : MonoBehaviour
 
             if (!isBillboardShowing)
             {
-                promptText.text = "Press the interact button to view the billboard";
+                promptText.text = "Press B to view the billboard";
                 promptText.gameObject.SetActive(true);
             }
         }
