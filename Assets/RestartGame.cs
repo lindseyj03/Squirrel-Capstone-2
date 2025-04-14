@@ -63,7 +63,24 @@ public class RestartGame : MonoBehaviour
     private void ShowConfirmationPanel(InputAction.CallbackContext context)
     {
         confirmationPanel.SetActive(true); // Show confirmation panel
+
+        var image = confirmationPanel.GetComponent<UnityEngine.UI.Image>();
+        if (image != null)
+        {
+            Color c = image.color;
+            c.a = 1f; // full opacity
+            image.color = c;
+        }
+
+        var renderer = confirmationPanel.GetComponent<SpriteRenderer>();
+        if (renderer != null)
+        {
+            Color c = renderer.color;
+            c.a = 1f; // full opacity
+            renderer.color = c;
+        }
     }
+
 
     private void ConfirmRestart(InputAction.CallbackContext context)
     {
