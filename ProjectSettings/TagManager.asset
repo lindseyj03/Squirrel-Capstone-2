@@ -6,6 +6,7 @@ TagManager:
   tags:
   - VendingMachine
   - Ground
+  - Grabbable
   layers:
   - Default
   - TransparentFX
